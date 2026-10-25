@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
+from curl_cffi import CurlMime
+
 if TYPE_CHECKING:
     from ..guest.client import GuestClient
     from .client import Client
@@ -143,19 +145,22 @@ class V11Client:
         }
         headers = self.base._base_headers
         headers.pop('content-type')
-        files = {
-            'media': (
-                'blob',
-                chunk_stream,
-                'application/octet-stream',
-            )
-        }
-        return await self.upload_media(
-            'POST',
-            is_long_video,
-            params=params,
-            headers=headers, files=files
+        multipart = CurlMime()
+        multipart.addpart(
+            name='media',
+            content_type='application/octet-stream',
+            filename='blob',
+            data=chunk_stream.getvalue(),
         )
+        try:
+            return await self.upload_media(
+                'POST',
+                is_long_video,
+                params=params,
+                headers=headers, multipart=multipart
+            )
+        finally:
+            multipart.close()
 
     async def upload_media_finelize(self, is_long_video, media_id):
         params = {

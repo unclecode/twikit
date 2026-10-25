@@ -7,7 +7,7 @@ from .user import User
 from .utils import build_user_data
 
 if TYPE_CHECKING:
-    from httpx import Response
+    from curl_cffi.requests import Response
 
     from .client.client import Client
     from .utils import Result
@@ -87,7 +87,7 @@ class Group:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -107,7 +107,7 @@ class Group:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
         """
         return await self._client.change_group_name(self.id, name)
@@ -230,7 +230,7 @@ class GroupMessage(Message):
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
         """
         return await self._client.add_reaction_to_message(
@@ -248,7 +248,7 @@ class GroupMessage(Message):
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
         """
         return await self._client.remove_reaction_from_message(

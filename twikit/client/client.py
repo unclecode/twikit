@@ -12,13 +12,12 @@ from urllib.parse import urlparse
 
 import filetype
 import pyotp
-from httpx import AsyncClient, AsyncHTTPTransport, Response
-from httpx._utils import URLPattern
+from curl_cffi.requests import AsyncSession, Response
 
 from .._captcha import Capsolver
 from ..bookmark import BookmarkFolder
 from ..community import Community, CommunityMember
-from ..constants import TOKEN, DOMAIN
+from ..constants import TOKEN, DOMAIN, IMPERSONATE
 from ..errors import (
     AccountLocked,
     AccountSuspended,
@@ -53,8 +52,7 @@ from ..utils import (
     build_tweet_data,
     build_user_data,
     find_dict,
-    find_entry_by_type,
-    httpx_transport_to_url
+    find_entry_by_type
 )
 from ..x_client_transaction.utils import handle_x_migration
 from ..x_client_transaction import ClientTransaction
@@ -100,11 +98,13 @@ class Client:
         if 'proxies' in kwargs:
             message = (
                 "The 'proxies' argument is now deprecated. Use 'proxy' "
-                "instead. https://github.com/encode/httpx/pull/2879"
+                "instead."
             )
             warnings.warn(message)
 
-        self.http = AsyncClient(proxy=proxy, **kwargs)
+        kwargs.setdefault('impersonate', IMPERSONATE)
+        kwargs.setdefault('allow_redirects', False)
+        self.http = AsyncSession(proxy=proxy, **kwargs)
         self.language = language
         self.proxy = proxy
         self.captcha_solver = captcha_solver
@@ -225,16 +225,11 @@ class Client:
     @property
     def proxy(self) -> str:
         ':meta private:'
-        transport: AsyncHTTPTransport = self.http._mounts.get(URLPattern('all://'))
-        if transport is None:
-            return None
-        if not hasattr(transport._pool, '_proxy_url'):
-            return None
-        return httpx_transport_to_url(transport)
+        return (self.http.proxies or {}).get('all')
 
     @proxy.setter
     def proxy(self, url: str) -> None:
-        self.http._mounts = {URLPattern('all://'): AsyncHTTPTransport(proxy=url)}
+        self.http.proxies = {'all': url} if url else {}
 
     def _get_csrf_token(self) -> str:
         """
@@ -1113,7 +1108,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -1358,7 +1353,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -1701,7 +1696,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
         """
         _, response = await self.gql.delete_scheduled_tweet(tweet_id)
@@ -2089,7 +2084,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -2115,7 +2110,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -2141,7 +2136,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -2167,7 +2162,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -2197,7 +2192,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -2222,7 +2217,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -2310,7 +2305,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -2392,7 +2387,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
         """
         _, response = await self.gql.delete_bookmark_folder(folder_id)
@@ -3009,7 +3004,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -3043,7 +3038,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -3070,7 +3065,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -3292,7 +3287,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -3316,7 +3311,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
         """
         _, response = await self.v11.conversation_update_name(group_id, name)
@@ -3369,7 +3364,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -3391,7 +3386,7 @@ class Client:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
         """
         _, response = await self.gql.delete_list_banner(list_id)
