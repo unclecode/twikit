@@ -4,11 +4,12 @@ import asyncio
 import io
 import json
 import os
+import re
 
 import warnings
 from functools import partial
 from typing import Any, AsyncGenerator, Literal
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 import filetype
 import pyotp
@@ -666,10 +667,24 @@ class Client:
         """
         if self._user_id is not None:
             return self._user_id
-        response, _ = await self.v11.settings()
-        screen_name = response['screen_name']
-        self._user_id = (await self.get_user_by_screen_name(screen_name)).id
+        try:
+            response, _ = await self.v11.settings()
+            screen_name = response['screen_name']
+            self._user_id = (await self.get_user_by_screen_name(screen_name)).id
+        except (TwitterException, KeyError, TypeError):
+            user_id = self._user_id_from_cookie()
+            if user_id is None:
+                raise
+            self._user_id = user_id
         return self._user_id
+
+    def _user_id_from_cookie(self) -> str | None:
+        """
+        Reads the authenticated account's ID from the ``twid`` cookie
+        (``u%3D<id>``), which X sets on every logged-in session.
+        """
+        match = re.search(r'u=(\d+)', unquote(self.get_cookies().get('twid', '')))
+        return match.group(1) if match else None
 
     async def user(self) -> User:
         """
