@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from httpx import Response
+    from curl_cffi.requests import Response
 
     from .client.client import Client
 
@@ -79,7 +79,7 @@ class Message:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
         """
         user_id = await self._client.user_id()
@@ -104,7 +104,7 @@ class Message:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
         """
         user_id = await self._client.user_id()
@@ -124,7 +124,7 @@ class Message:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         See Also

@@ -6,12 +6,11 @@ from functools import partial
 from typing import Any, Literal
 from urllib.parse import urlparse
 
-from httpx import AsyncClient, AsyncHTTPTransport, Response
-from httpx._utils import URLPattern
+from curl_cffi.requests import AsyncSession, Response
 
 from ..client.gql import GQLClient
 from ..client.v11 import V11Client
-from ..constants import DOMAIN, TOKEN
+from ..constants import DOMAIN, IMPERSONATE, TOKEN
 from ..errors import (
     BadRequest,
     Forbidden,
@@ -22,7 +21,7 @@ from ..errors import (
     TwitterException,
     Unauthorized
 )
-from ..utils import Result, find_dict, find_entry_by_type, httpx_transport_to_url
+from ..utils import Result, find_dict, find_entry_by_type
 from ..x_client_transaction import ClientTransaction
 from .tweet import Tweet
 from .user import User
@@ -79,11 +78,13 @@ class GuestClient:
         if 'proxies' in kwargs:
             message = (
                 "The 'proxies' argument is now deprecated. Use 'proxy' "
-                "instead. https://github.com/encode/httpx/pull/2879"
+                "instead."
             )
             warnings.warn(message)
 
-        self.http = AsyncClient(proxy=proxy, **kwargs)
+        kwargs.setdefault('impersonate', IMPERSONATE)
+        kwargs.setdefault('allow_redirects', False)
+        self.http = AsyncSession(proxy=proxy, **kwargs)
         self.language = language
         self.proxy = proxy
 
@@ -161,20 +162,11 @@ class GuestClient:
     @property
     def proxy(self) -> str:
         ':meta private:'
-        transport: AsyncHTTPTransport = self.http._mounts.get(
-            URLPattern('all://')
-        )
-        if transport is None:
-            return None
-        if not hasattr(transport._pool, '_proxy_url'):
-            return None
-        return httpx_transport_to_url(transport)
+        return (self.http.proxies or {}).get('all')
 
     @proxy.setter
     def proxy(self, url: str) -> None:
-        self.http._mounts = {
-            URLPattern('all://'): AsyncHTTPTransport(proxy=url)
-        }
+        self.http.proxies = {'all': url} if url else {}
 
     @property
     def _base_headers(self) -> dict[str, str]:

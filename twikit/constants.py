@@ -3,6 +3,8 @@ TOKEN = 'AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8
 
 DOMAIN = 'x.com'
 
+IMPERSONATE = 'safari17_0'
+
 FEATURES = {
     'creator_subscriptions_tweet_preview_api_enabled': True,
     'c9s_tweet_anatomy_moderator_badge_enabled': True,

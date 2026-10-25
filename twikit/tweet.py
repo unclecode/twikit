@@ -10,7 +10,7 @@ from .user import User
 from .utils import find_dict, timestamp_to_datetime
 
 if TYPE_CHECKING:
-    from httpx import Response
+    from curl_cffi.requests import Response
 
     from .client.client import Client
     from .utils import Result
@@ -329,7 +329,7 @@ class Tweet:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         Examples
@@ -344,7 +344,7 @@ class Tweet:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         See Also
@@ -359,7 +359,7 @@ class Tweet:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         See Also
@@ -374,7 +374,7 @@ class Tweet:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         See Also
@@ -389,7 +389,7 @@ class Tweet:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         See Also
@@ -404,7 +404,7 @@ class Tweet:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         See Also
@@ -419,7 +419,7 @@ class Tweet:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
 
         See Also
@@ -599,7 +599,7 @@ class ScheduledTweet:
 
         Returns
         -------
-        :class:`httpx.Response`
+        :class:`curl_cffi.requests.Response`
             Response returned from twitter api.
         """
         return await self._client.delete_scheduled_tweet(self.id)

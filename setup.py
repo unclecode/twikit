@@ -13,7 +13,7 @@ setup(
     name='twikit',
     version=version,
     install_requires=[
-        'httpx[socks]',
+        'curl_cffi>=0.15',
         'filetype',
         'beautifulsoup4',
         'pyotp',

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from time import sleep
 
-import httpx
+from curl_cffi import requests
 
 from .base import CaptchaSolver
 
@@ -52,7 +52,7 @@ class Capsolver(CaptchaSolver):
             'clientKey': self.api_key,
             'task': task_data
         }
-        response = httpx.post(
+        response = requests.post(
             'https://api.capsolver.com/createTask',
             json=data,
             headers={'content-type': 'application/json'}
@@ -64,7 +64,7 @@ class Capsolver(CaptchaSolver):
             'clientKey': self.api_key,
             'taskId': task_id
         }
-        response = httpx.post(
+        response = requests.post(
             'https://api.capsolver.com/getTaskResult',
             json=data,
             headers={'content-type': 'application/json'}

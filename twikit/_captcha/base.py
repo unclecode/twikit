@@ -4,7 +4,7 @@ import re
 from typing import TYPE_CHECKING, NamedTuple
 
 from bs4 import BeautifulSoup
-from httpx import Response
+from curl_cffi.requests import Response
 from ..constants import DOMAIN
 
 if TYPE_CHECKING:

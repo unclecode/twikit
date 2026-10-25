@@ -3,7 +3,6 @@ from __future__ import annotations
 import base64
 import json
 from datetime import datetime
-from httpx import AsyncHTTPTransport
 from typing import TYPE_CHECKING, Any, Awaitable, Generic, Iterator, Literal, TypedDict, TypeVar
 
 if TYPE_CHECKING:
@@ -125,25 +124,6 @@ def find_dict(obj: list | dict, key: str | int, find_one: bool = False) -> list[
             if r and find_one:
                 return results
     return results
-
-
-def httpx_transport_to_url(transport: AsyncHTTPTransport) -> str:
-    url = transport._pool._proxy_url
-    scheme = url.scheme.decode()
-    host = url.host.decode()
-    port = url.port
-    auth = None
-    if transport._pool._proxy_headers:
-        auth_header = dict(transport._pool._proxy_headers)[b'Proxy-Authorization'].decode()
-        auth = base64.b64decode(auth_header.split()[1]).decode()
-
-    url_str = f'{scheme}://'
-    if auth is not None:
-        url_str += auth + '@'
-    url_str += host
-    if port is not None:
-        url_str += f':{port}'
-    return url_str
 
 
 def get_query_id(url: str) -> str:
